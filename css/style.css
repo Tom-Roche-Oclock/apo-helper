@@ -1,0 +1,90 @@
+/* Cyan Light scheme (Default) */
+/* Can be forced with data-theme="light" */
+[data-theme="light"],
+:root:not([data-theme="dark"]) {
+  --primary: #00acc1;
+  --primary-hover: #0097a7;
+  --primary-focus: rgba(0, 172, 193, 0.125);
+  --primary-inverse: #FFF;
+}
+
+/* Cyan Dark scheme (Auto) */
+/* Automatically enabled if user has Dark mode enabled */
+@media only screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --primary: #00acc1;
+    --primary-hover: #00bcd4;
+    --primary-focus: rgba(0, 172, 193, 0.25);
+    --primary-inverse: #FFF;
+  }
+}
+
+/* Cyan Dark scheme (Forced) */
+/* Enabled if forced with data-theme="dark" */
+[data-theme="dark"] {
+  --primary: #00acc1;
+  --primary-hover: #00bcd4;
+  --primary-focus: rgba(0, 172, 193, 0.25);
+  --primary-inverse: #FFF;
+}
+
+/* Cyan (Common styles) */
+:root {
+  --form-element-active-border-color: var(--primary);
+  --form-element-focus-color: var(--primary-focus);
+  --switch-color: var(--primary-inverse);
+  --switch-checked-background-color: var(--primary);
+}
+
+@media (min-width: 1200px) {
+  :root {
+    --font-size: 17px;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.container {
+  display: flex;
+}
+
+main {
+  padding: 2rem 0;
+}
+
+nav {
+  margin-top: 10rem;
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  padding: 1rem;
+}
+
+nav ul {
+  padding: 1rem;
+  width: 15rem;
+}
+
+nav ul li a {
+  padding: 1rem 0;
+  border-radius: 0;
+  border-bottom: solid 1px rgba(255, 255, 255, 0.1);
+}
+
+h2 {
+  padding-top: 3rem;
+}
+
+h3 {
+  line-height: 2;
+}
+
+h3::after {
+  content: '';
+  display: block;
+  width: 2rem;
+  height: .25rem;
+  background-color: var(--primary);
+}

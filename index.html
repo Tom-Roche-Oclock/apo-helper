@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apothéose Helper - JS Version</title>
+  <link rel="stylesheet" href="./css/pico.min.css">
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+
+<body>
+  <div class="container">
+
+    <aside>
+      <nav>
+        <ul>
+          <li><a href="#conseils-generaux">Conseils généraux</a></li>
+          <li><a href="#api-or-not-api">API or not API ?</a></li>
+          <li><a href="#par-ou-commencer">Par où commencer ?</a></li>
+          <li><a href="#par-ou-commencer">Front/Back prêt à communiquer</a></li>
+          <li><a href="#authentification">Authentification</a></li>
+          <li><a href="#cors">CORS</a></li>
+          <li><a href="#emails">Emails</a></li>
+          <li><a href="#upload-image">Upload d'images</a></li>
+          <li><a href="#temps-reel">Je veux faire du temps réel</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main>
+      <h1 class="main-title">Apothéose Helper</h1>
+
+      <article>
+        <p>
+          Tu retrouveras ici des conseils et aides pour t'aider au mieux sur tes problématiques pendant l'apothéose. Tu
+          n'es
+          pas obligé de tout lire d'un coup, tu peux lire les parties <a href="#conseils-generaux">Conseils
+            généraux</a>, <a href="#api-or-not-api">API or not API ?</a> et <a href="#par-ou-commencer">Par où commencer
+            ?</a>
+          puis revenir plus tard sur les autres parties au moment où tu en auras besoin.</p>
+          <p>Bonne lecture !</p>
+        
+      </article>
+
+      <h2 class="secondary-title" id="conseils-generaux">
+        <a href="#conseils-generaux"># Conseils généraux</a>
+      </h2>
+      <div class="content">
+        <p>Voici quelques conseils généraux importants à prendre en compte.</p>
+        <h3 class="tertiary-title">Le partage du travail</h3>
+        <p>
+          Il peut être compliqué de savoir comment travailler à plusieurs sur un projet. Surtout quand des
+          fonctionnalités
+          dépendent d'autres. Par exemple, vous avez besoin que le projet soit installé et configuré pour faire votre
+          homepage (éhé sacré cerveau). Eh bien dans ces cas-là, mettez-vous à deux sur la fonctionnalité, en pair
+          programming. Quelques moments du genre : <em>installation</em>, <em>création</em> <em>de l'entité des
+            users</em>,
+          <em>installation de la première fixture</em>, <em>création de l'authentification</em>, <em>création du
+            store</em>, etc.
+        </p>
+        <h3 class="tertiary-title">
+          Kikifé ? Le back ou le front ?
+        </h3>
+        <p>
+          Souvent, vous vous posez la question de savoir si c'est le back ou le front qui doit faire telle ou telle
+          chose.
+          Pour
+          obtenir la réponse il faut garder en tête que:<br />
+          <ul>
+            <li><strong>le back gère la donnée et que le front ne fait que l'afficher</strong></li>
+            <li><strong>tout ce qui est fait côté front peut être analysé et trouvé par des "hackers"</strong></li>
+            <li><strong>l'application doit être performante et donc ne pas utiliser de ressources inutilement.</strong></li>
+          </ul>
+        </p>
+        <p>
+          Par exemple si tu dois faire une pagination et que tu appelles un endpoint de l'API qui te renvoie tous les
+          articles stockés en BDD, si il y en a 10000, ça veut dire que tu récupères ces 10000 articles avec tout leur
+          contenu via le réseau. Ensuite tu trouves que 10000 qui s'affichent, c'est trop, donc tu décides de faire une
+          pagination côté front. Ça va être encore pire, car maintenant tu demandes au navigateur de gérer un affichage
+          dynamique pour 10000 entrées. <br />
+          L'idée est plutôt de faire une pagination côté api et de ne renvoyer que les données utiles au client. <br />
+          Par exemple le client demande l'url <code>/api/articles?page=1</code> et le serveur lui renvoie les 10
+          premiers
+          articles avec en plus le nombre total d'articles et le nombre total de page. Comme ça, le front peut afficher
+          ces 10 articles mais aussi la pagination. Et si l'utilisateur clique sur la page 2, le front demande
+          <code>/api/articles?page=2</code> et le serveur lui renvoi les 10 articles suivants. <br />
+        </p>
+        <p>
+          Question sécurité des données et de la logique d'application, on va maintenant prendre l'exemple d'un jeu
+          (mais
+          ça marche tout pour type d'appli !). <br />
+          Imaginons que tu as un jeu en front avec un score calculé à la fin du jeu en fonction des actions de
+          l'utilisateur. Si ce calcul est fait côté front, il peut être très simple pour un "hacker" de modifier les
+          variables pour se mettre un score énorme. <br /> Il faut se dire que le front ne décide de rien tout seul. Il
+          doit faire des "demandes" au backend et c'est le backend qui fait les calculs pour répondre au front. <br />
+        </p>
+        <p class="warning">
+          Pour clarifier ce point prenons l'exemple d'un jeu type Quiz. <br />
+          Le backend ne doit envoyer que le tableau de questions avec les réponses possibles, mais pas les bonnes
+          réponses. Si les bonnes réponses sont envoyées, il suffit de regarder le network pour trouver la réponse.
+          <br />
+          Donc la vérification des réponses doit être faite côté backend avec soit un appel API à chaque réponse de
+          l'utilisateur pour avoir un retour direct, soit un appel API à la fin du quiz pour avoir le score final.
+          <br />
+        </p>
+        <h3 class="tertiary-title">Les données</h3>
+        <p>
+          En phase de développement, on se fiche totalement des données présentes en BDD. Autrement dit, on n'a besoin
+          d'aucun vrai contenu pour développer, que des données de test. 
+          On crée des migrations et/ou des scripts de seeding pour avoir des données de test. <br /> 
+          <strong>Interdit de se passer les bases
+            de
+            données par export SQL</strong>, c'est contraire au principe de migration et peut générer des erreurs.
+          <br />
+          Par exemple, si vous avez versionné avec Sqitch, quand je récupère un projet backend, il doit être fonctionnel avec des datas et utilisateurs de test après
+          avoir fait :
+        </p>
+        <ul class="warning">
+          <li><code>npm install</code></li>
+          <li>Modification du <code>.env</code> pour la connexion à la BDD<br /> (et autres spécifiés dans le .env.example) </li>
+          <li><code>sqitch deploy</code></li>
+          <li>et une commande de seeding définie par ex: <code>npm run db:seed</code></li>
+        </ul>
+        <p>
+          Si vous versionnez avec votre ORM (Sequelize, Prisma...) adaptez cette démarche et documentez-la dans le README.
+        </p>
+        <p>
+          De manière globale, <strong>10/20 entrées par entités suffisent pour développer</strong>.
+        </p>
+        <h3 class="tertiary-title">Git</h3>
+        <p>
+          Organisation conseillée : <br />
+          - <code>master</code>: c'est la branche de référence pour la production. Tout doit être fonctionnel dessus.
+          Uniquement la branche de <code>dev</code> a le droit d'être mergée dessus, quand elle n'a plus d'erreur.
+          <br />
+          - <code>dev</code>: c'est la branche de référence pour le développement, toute fonctionnalité terminée doit
+          être
+          mergée dans cette branche après avoir été testée.<br />
+          - <code>brancheFonctionnalité1</code>: une branche à chaque fois qu'on commence une fonctionnalité (header,
+          homepage, connexion, contact-page) etc ... <br />
+          - <code>brancheFonctionnalité2</code><br />
+          - etc.<br />
+        </p>
+        <p>Une nouvelle fonctionnalité à développer ? <code>git checkout -b maNouvelleBranche</code></p>
+        <p>Noms de commits: <br />
+          - <code>git commit -m "feat: add contact page"</code> <br />
+          - <code>git commit -m "fix: login issue when no email"</code> <br />
+          - <code>git commit -m "refacto: better homepage styling "</code> <br />
+          - <code>git commit -m "docs: addded documentation for image upload"</code> <br />
+          - <code>git commit -m "wip: MailHog configuration not finished"</code> <br />
+        </p>
+        <p>
+          Pour merger, soit vous le fait en local et vous poussez ensuite sur GitHub, soit vous faites une <strong>
+            pull request
+            sur GitHub
+          </strong>. Au choix. La deuxième est plus sympa pour montrer aux autres ce que vous avez fait avant de mettre
+          sur dev. Une fois votre fonctionnalité terminée, supprimez votre branche localement et sur GitHub, et repartez
+          sur une nouvelle depuis dev.
+        </p>
+        <p class="warning">
+          Petite astuce : <br />
+          Avant de mettre vos branches de fonctionnalités sur la branche de dev, faites un merge de dev sur votre
+          branche.
+          Vous pourrez régler les potentiels conflits sur votre branche à vous avant de faire votre pull request. Ce qui
+          fait que votre pull request passera à coup sûr.
+        </p>
+      </div>
+
+
+      <h2 class="secondary-title" id="api-or-not-api">
+        <a href="#api-or-not-api"># API or not API ?</a>
+      </h2>
+      <div class="content">
+        <h3 class="tertiary-title">API</h3>
+
+        <p>
+          Les projets <strong>React/Symfony</strong> et <strong>Svelte/Directus</strong> sont des projets qui
+          nécessitent
+          d'être fait en mode <strong>API JSON</strong>.
+          <br />
+          Il y aura de préférence un repository pour le back et un pour le front.
+        </p>
+        <p>Pour Directus, pas de repository étant donné qu'il s'agit d'un site distant. Il permet de créer une base de
+          donnée et automatiquement des endpoints d'API via une interface en ligne.</p>
+        <p>
+          Pour Symfony cela signifie donc que de manière basique le projet back n'affichera pas de html. Il ne
+          retournera
+          que du json. Pour autant, il faudra certainement un back-office qui lui sera donc fait en twig. Mais il
+          arrivera
+          dans un deuxième temps.
+        </p>
+        <p>
+          Côté Svelte, pas besoin de coder un back-office particulier, Directus gérant cette partie.
+        </p>
+        <p class="warning">
+          Quand je suis en mode API, je ne réfléchis pas en termes de page. Par exemple côté Symfony je ne dois pas
+          créer
+          un unique endpoint qui va permettre de renvoyer TOUTES les données de la page d'accueil. Je dois faire des
+          endpoints "granulaires" qui renvoient des données pour une ressource, une entité. Si la page d'accueil a 3
+          sections : <br />
+          - une section avec les 3 derniers articles de blog <br />
+          - une section avec les 3 derniers produits <br />
+          - une section avec les 5 offres d'emplois <br />
+          Le back doit faire un endpoint pour chacun et le front doit faire 3 appels API pour récupérer les données.
+          D'ailleurs, le plus simple est que le backend fasse un endpoint paramétrable pour le front puisse spécifier
+          combien d'articles ou de produit il veut récupérer.<br /> Un exemple complexe :
+          <code>http://localhost:8000/api/articles?nbItems=3&order=asc=orderBy=date</code>
+        </p>
+        <p class="warning">
+          Attention aussi côté React ou Svelte. Si j'ai une page qui liste des articles par exemple et que je veux
+          pouvoir
+          cliquer sur un article et accéder à son détail. Je dois faire deux pages différentes avec deux appels API
+          différents. Un qui va lister les articles et un qui va être déclenché à chaque fois qu'on va sur le détail
+          d'un
+          article. On ne réutilise pas les données de la liste pour le détail.
+        </p>
+
+        <h3 class="tertiary-title">Précisions sur les routes en mode API</h3>
+        <p>
+          En mode API, il faut bien séparer les routes back des routes front. <br />
+          Il faut voir le back comme une boite à outil permettant au front de récupérer les données qui l'intéresse et
+          (d'ajouter les données qui l'intéresse aussi.). <br />
+          Le back doit donc proposer une multitude d'endpoint spécifiques et paramétrables pour que le front puisse
+          faire
+          sa popote avec. <br />
+          Par exemple doit prévoir les GET, POST, PUT, PATCH et DELETE pour chacune de ses entités si le front en a
+          besoin
+          évidemment. Dans l'idée aussi, pour les GET qui vont retourner un tableau d'une entité, il faudra prévoir
+          d'ajouter des paramètres pour par exemple filtrer par tel type de champ. <br />
+          C'est aussi le back qui devra prévoir l'endpoint pour faire une recherche si vous avez besoin d'un formulaire
+          de
+          recherche.
+          <br />
+          <br />
+          De son côté, le front doit donc faire des appels API vers ces routes là.
+          <br />
+          Le router du front (mais vous l'aviez certainement déjà remarqué) n'a que des routes en GET. C'est pas lui
+          même
+          qui va traiter en POST les données des formulaires. Il envoi les données au back qui traite les données et
+          renvoi si l'insertion en bdd s'est bien passée ou non par exemple.
+          <br />
+          Il est donc primordial que le back renvoi des codes HTTP pour chaque requête. (200: ok, 201: created, 400: bad
+          request, 404: not found, 401: unauthorized, etc.)
+        </p>
+
+        <h3 class="tertiary-title">NOT API</h3>
+        <p>
+          Si l'équipe n'est composée que de Symfony, le projet ne devra donc pas être fait en mode API. On code donc de
+          manière classique avec des templates twig.
+        </p>
+        <p class="warning">
+          Pour le TP c'est tout de même bien d'avoir un petit appel API quelque part. Donc soit vous utilisez une api
+          externe pertinente pour votre projet, soit vous faites un endpoint pour ajouter des likes sur un article (par
+          exemple), que vous appelez avec un <code>fetch()</code> au clic sur le bouton like d'un article.
+        </p>
+      </div>
+
+      <h2 class="secondary-title" id="par-ou-commencer">
+        <a href="#par-ou-commencer"># Par où commencer ?</a>
+      </h2>
+      <div class="content">
+        <h3 class="tertiary-title">Directus/Svelte</h3>
+        <p>
+          Le plus simple c'est de commencer par mettre en place la base de donnée avec Directus pour avoir quelques
+          endpoints à disposition. Ensuite, vous pouvez commencer à coder le front en Svelte en utilisant les endpoints
+          de
+          Directus.
+        </p>
+        <p>
+          Côté Svelte, après l'installation de l'application, il peut être intéressant de commencer par mettre en place
+          le
+          système de routing et de créer les composants vides de l'application. Dans le cas d'un blog par exemple, créez
+          directement les routes pour la page d'accueil, le listing des articles et le détail d'un article avec les
+          composants à vide. Ensuite, vous pouvez commencer à coder les composants un par un en vous répartissant les
+          composants entre vous.
+        </p>
+        <h3 class="tertiary-title">Symfony</h3>
+        <p>
+          Que vous soyez en mode API ou Full Symfony, il faut commencer par créer les entités et les fixtures pour avoir
+          des données de test à afficher. Pour les entités, commencez par celle des utilisateur avec
+          <code>make:user</code> pour être sur d'avoir tout ce qu'il faut pour le hashage de mdp etc. Créez vous 1
+          utilisateur admin et 1 utilisateur classique en dur dans les fixtures que chacun pourra utiliser pour se
+          connecter.
+          Si vous comptez faire un back-office ou êtes en full Symfo, utilisez <code>make:auth</code> pour générer le
+          système de register et login du projet. <br />
+          En mode API, une fois que vous aurez au moins l'entité user + une autre entité avec des données et deux trois
+          endpoints, installez le bundle d'authentification indiqué dans la section <a
+            href="#authentification">Authentification</a> et mettez en place l'authentification. <br />
+          Ensuite, continuez vos entités et endpoints en fonction des besoins du projet et des fronteux en priorité.
+          Vous
+          êtes à leur service ! :D <br />
+        <p class="warning">
+          N'oubliez pas que le front doit pouvoir utiliser votre API sans avoir à vous envoyer un message toutes les 5
+          minutes, alors : Documentez vos routes d'API dans un fichier ou sur un endpoint de votre api genre "/api/docs"
+          qui permettra de savoir au front ce qu'il peut faire avec votre API.
+          <br />
+          <br />
+          Aussi, les fronteux doivent pouvoir installer votre projet sans avoir à vous demander comment faire. Donc
+          pensez
+          à bien documenter les étapes d'installation de votre projet dans un fichier <code>INSTALL.md</code> à la
+          racine
+          de votre projet.
+          (<code>composer install, modification du .env.local, bin/console doctrine:database:create, bin/console doctrine:migrations:migrate, bin/console doctrine:fixtures:load</code>
+          et tout autres spécificités de votre projet)
+        </p>
+        </p>
+        <h3 class="tertiary-title">React</h3>
+        <p>
+          Comme pour Svelte, commencez par mettre en place le système de routing et créer les composants vides de
+          l'application. Ensuite, vous pouvez commencer à coder les composants un par un en vous répartissant les
+          composants entre vous. <br />
+          Côté organisation, il est recommandé d'avoir un dossier pour les composants de type "Page" et un dossier
+          "Components" pour les composants réutilisables. <br />
+        </p>
+        <p>
+          En attendant que le back vous mette des endpoints à disposition, vous pouvez soit utiliser des données en dur
+          dans vos composants, soit vous créer des fichiers json avec la même structure de donnée que vous enverra le
+          back. Ce dernier choix est intéressant car si vous vous concertez bien avec le back, il vous suffira de
+          remplaer
+          l'import du json par un fetch à l'API du back et votre composant marchera immédiatement si vous avez bien les
+          même noms de propriétés <br />
+        </p>
+        <p>
+          Si vous décidez que votre application nécessaire Redux, configurez le dès le début du projet en prenant
+          example
+          sur les projets fait en spé React. Vous pouvez aussi décidez ne pas l'utiliser (même si conseillé) et
+          d'utiliser
+          le context de React ou des librairies light comme <a href="https://github.com/pmndrs/zustand">zustand</a> ou
+          <a href="https://tanstack.com/query/v3/" target="_blank">React Query</a> pour gérer le state de l'application.
+          <br />
+        </p>
+        <p class="warning">
+          Si vous partez sur ces derniers outils, soyez conscient que tous les tuteurs ne connaissent pas forcément ces
+          technos et ne pourront pas forcément vous aider aussi efficacement que sur les technos vues en Spé.
+        </p>
+      </div>
+
+      <h2 class="secondary-title" id="front-back-prets-a-communiquer">
+        <a href="#front-back-prets-a-communiquer"># Front/Back prêt à communiquer</a>
+      </h2>
+      <div class="content">
+        <p class="warning">
+          "Côté back on a des données et des endpoints et côté front on a des composants en durs prêt à faire de vrais
+          appels API. On fait comment ? "
+        </p>
+
+        Plusieurs choix s'offre à toi, et on te laisse choisir en fonction de tes préférences.
+
+        <h3 class="tertiary-title">Cloner le repo du back chez chaque dev front</h3>
+        <p>
+          Ça parait relou vu comme ça, mais c'est une des méthodes les plus efficace, car si le back a bien fait son
+          travail avec un process d'installation, il y aura 4/5 commandes à faire une fois au premier clone et puis
+          derrière il faudra juste faire des <code>git pull</code><br />
+          Maintenant que le repo du back est chez toi, tu n'as plus qu'à faire tes appels API vers ses endpoints.
+        </p>
+        <h3 class="tertiary-title">Mettre en ligne le back sur une VM Kourou</h3>
+        <p>
+          Finalement, faire ça, c'est mettre en prod, donc autant le faire le plus tôt possible aussi pour mettre ça de
+          côté. Ça peut être un peu long à mettre en place mais c'est une solution pratique car tous les fronteux
+          pourront
+          faire les appels API vers ce back.
+          <br />
+          Seul problème, il faut que celui qui ait mit en ligne sur sa VM Kourou pense à la démarrer tous les matins. Et
+          si il n'est pas là, on a plus de back à dispo. Quelqu'un d'autres devra donc mettre en ligne.
+          <br />
+          Je ne détail pas ici les manips, vous avez les infos avec les cours de S08 et fiches récaps Kourou.
+        </p>
+        <h3 class="tertiary-title">Utiliser un outil comme <a href="https://ngrok.com/" target="_blank">ngrok</a></h3>
+        <p>
+          Ngrok est un outil qui permet de "mettre en ligne" un serveur local. C'est très pratique pour faire des démos
+          ou
+          pour que des devs front puissent faire des appels API vers un back local. <br />
+          Il suffit de lancer la commande <code>ngrok http 8000</code> pour mettre en ligne le serveur local sur le port
+          8000 par exemple. <br />
+          Ensuite, il suffit de donner l'url à vos collègues pour qu'ils puissent faire des appels API vers votre back
+          local. <br />
+          <br />
+          Ce mécanisme s'appelle du tunneling. En gros, ngrok va créer un tunnel entre votre serveur local et un serveur
+          distant. Les appels API vont donc passer par le serveur distant qui va les rediriger vers votre serveur local.
+          <br />
+          <br />
+          Pour installer l'outil, ça se passe ici : <a href="https://ngrok.com/" target="_blank">https://ngrok.com/</a>
+          <br />
+          <br />
+          Pour info, sur le site d'ngrok, vous avez la possibilité d'avoir un nom de domaine unique gratuit, qui sera
+          toujours le même. Une fois créé, utilisez le en lançant la commande :
+          <code>ngrok http --domain=VOTRE-DOMAIN.ngrok-free.app 8000</code> (évidemment changez le port en fonction de
+          sur
+          quoi vous avez lancé votre app)
+        </p>
+
+        <h3 class="tertiary-title">Svelte/Directus</h3>
+        <p>
+          Rien de plus simple pour vous, directus est déjà en ligne ! EZ to use.
+        </p>
+      </div>
+
+      <h2 class="secondary-title" id="authentification">
+        <a href="#authentification"># Authentification</a>
+      </h2>
+      <div class="content">
+        <h3 class="tertiary-title">Symfony/React</h3>
+        <p>
+          Il faudra passer par le bundle <a href="https://github.com/lexik/LexikJWTAuthenticationBundle"
+            target="_blank">
+            Lexik JWT
+            Authentication</a>. Il s'occupe de tout et il faut simplement avoir déjà géré l'ajout d'utilisateur à votre
+          projet. Assurez-vous d'avoir utilisé la commande <code>bin/console make:user</code> pour avoir une base
+          correcte.<br />
+          Suivez la documentation sur le GitHub pas à pas et il ne devrait pas y avoir de soucis.
+          <br />
+        </p>
+        <p class="warning">
+          Attention, quand vous testerez avec Insomnia, Postman ou autre ça marchera sans avoir à se soucier des CORS.
+          Dès
+          que vous voudrez tester avec le front, il faudra penser à configurer les CORS. Voir la section <a
+            href="#cors">CORS</a>.
+        </p>
+        <h3 class="tertiary-title">Svelte/Directus</h3>
+        <p>
+          Ici tout est déjà géré par Directus. Vous avez donc les endpoints nécessaires à la connexion spécifiée dans la
+          <a href="https://docs.directus.io/reference/authentication.html" target="_blank">doc ici</a>. Pas de soucis de
+          CORS.
+        </p>
+        <h3 class="tertiary-title">Full Symfony</h3>
+        <p>
+          Pas d'API donc vous pouvez passer par l'authentification avec Symfony. Le plus simple reste d'utiliser la
+          commande <code>bin/console make:auth</code> après la commande <code>bin/console make:user</code> et de suivre
+          la
+          doc. Gardez bien en tête qu'il faut quand même être capable de comprendre les fichiers générés !
+        </p>
+      </div>
+
+      <h2 class="secondary-title" id="cors">
+        <a href="#cors"># CORS</a>
+      </h2>
+      <div class="content">
+        <h3 class="tertiary-title">C'est quoi et ça concerne qui ? </h3>
+        <p>
+          CORS signifie <strong>Cross Origin Resource Sharing</strong>. C'est un mécanisme qui permet à un serveur de
+          restreindre les ressources qu'il met à disposition d'une page web. Cela permet d'éviter les problèmes de
+          sécurité (mais pas vraiment, j'y reviens).<br />
+          En gros, si vous avez un serveur qui tourne sur <code>localhost:8000</code> et que vous voulez faire des
+          requêtes depuis votre front qui tourne sur <code>localhost:3000</code>, il faudra configurer les CORS pour
+          autoriser les requêtes, car les deux projets sont sur des ports différents. Ça serait pareil avec des noms de
+          domaines différents.
+        </p>
+        <p>
+          Pour spécifier les ports/domaines qu'on autorise, on pourrait ajouter un header HTTP spécifique, mais on
+          préfère
+          utiliser une librairie qui va nous faciliter la tâche.
+          <br /> Concrètement il s'agirait d'ajouter un header HTTP <code>Access-Control-Allow-Origin</code>
+        </p>
+        <p class="warning">
+          <em>"Mais pourquoi j'ai pas le soucis avec Insomnia/Postman ?"</em> => Parce que ces outils ne sont pas soumis
+          aux CORS. En fait ce n'est pas directement le serveur qui bloque un nom de domaine ou qui autorise un nom
+          de domaine. C'est une implémentation dans le navigateur qui voit que le serveur lui met un en tête pour
+          autoriser ou non une origine. Donc si le client qui demande une ressource qui n'est pas autorisée, le
+          navigateur
+          bloque la requête. Insomnia ou Postman ne font pas cette implémentation et se fichent complètement du header.
+          <br />
+          Avec cette explication, vous devez aussi comprendre que les CORS, à part être ennuyeux, ne protègent pas grand
+          chose... étant donné qu'on peut très bien appeler des endpoints api via des outils comme Insomnia ou Postman
+          ou
+          même des scripts en ligne de commande. On va dire que le seul intérêt, c'est que quelqu'un ne pourra pas coder
+          un
+          front qui se sert de notre API et le mettre en ligne sur son propre domaine.
+        </p>
+
+        <h3 class="tertiary-title">Symfony/React</h3>
+        <p>
+          Si vous avez un projet Symfony/React, il faudra configurer les CORS. Pour cela, il faut installer le bundle <a
+            href="https://github.com/nelmio/NelmioCorsBundle" target="_blank">NelmioCorsBundle</a>.<br />
+          Suivez la doc et tout devrait bien se passer.
+        </p>
+        <p>
+          Pour le début, je vous conseille de laisser tout ouvert et définir <code>allow_origin: ["*"]</code> et
+          <code>allow_headers: ["*"]</code> dans le fichier <code>nelmio_cors.yaml</code>.<br />
+          Une fois en prod, vous pourrez changer le <code>allow_origin</code> pour n'autoriser que le domaine de votre
+          frontend.
+        </p>
+        <p class="warning">Astuce: Si vous voulez tester que les CORS marchent sans avoir à solliciter le front ou
+          devoir
+          mettre le projet en ligne. Vous pouvez vous créer une mini app dans un fichier <code>index.html</code> qui
+          aura
+          pour seul but de faire une requête <code>fetch()</code> vers un endpoint de votre projet Symfony.</p>
+      </div>
+
+      <h2 class="secondary-title" id="emails">
+        <a href="#emails"># Emails</a>
+      </h2>
+      <div class="content">
+        <h3 class="tertiary-title">Tous projets</h3>
+        <p>
+          L'envoi d'email n'est pas toujours simple à configurer et il faudrait avoir un serveur SMTP pour pouvoir
+          envoyer
+          de vrais email. Pendant la période de développement, on s'en fiche un peu d'envoyer de vrais emails, mais on
+          veut pouvoir tester si ils partent bien quand même. On va donc utiliser des outils pour intercepter les
+          tentatives d'envois d'email et les afficher dans des fausses boites mails. Comme ça on sait que si ça part, on
+          n'aura plus qu'à brancher au serveur SMTP pour que les emails s'envoient en prod.
+        </p>
+        <p>Il existe aussi d'autres moyens qu'on décrit plus bas.</p>
+        <h3 class="tertiary-title">Intercepteurs d'emails</h3>
+        <p>
+          Il existe plusieurs outils pour intercepter les emails. On en liste 2 ici :
+        </p>
+        <p>
+          <a href="https://github.com/mailhog/MailHog" target="_blank">MailHog</a> permet d'intercepter les emails
+          envoyés
+          sur le port 1025 avec le protocole SMTP. Cet outil vient avec une
+          fausse boite de reception en local, accessible à l'adresse <a href="http://0.0.0.0:8025/"
+            target="_blank">http://0.0.0.0:8025</a>
+          une fois mailhog lancé. Pour
+          installer et lancer cet outil, c'est assez simple :
+
+        <p class="warning">
+          1. <code>sudo apt-get -y install golang-go</code><br />
+          2. <code>go get github.com/mailhog/MailHog</code><br />
+          3. <code>~/go/bin/MailHog</code><br />
+        </p>
+
+        On accède à la "boite mail" sur <a href="http://0.0.0.0:8025/" target="_blank">http://0.0.0.0:8025</a> et on
+        envoi
+        les mails sur <code>smtp://localhost:1025</code>, c'est tout
+        !
+        </p>
+        <p>
+          <a href="https://mailtrap.io/" target="_blank">MailTrap</a> de son côté, ne nécessite pas d'installation sur
+          ta
+          machine. C'est un service en ligne via lequel on
+          envoi nos emails. La boite de réception est également accessible via le site de MailTrap. <a
+            href="https://mailtrap.io/register/signup?ref=pricing_table_summary" target="_blank">Se créer un compte
+            ici</a>
+          puis dans "My Inbox" sélectionner l'intégration voulue par rapport à ta techno. MailTrap te fournit la
+          configuration à copier/coller dans ton projet. Tu n'as plus qu'à tester l'envoi d'un mail.
+        </p>
+        <h3 class="tertiary-title">Qui envoie les mails ?</h3>
+        <p>
+          Pour un projet <strong>Symfony/React</strong> c'est <strong>Symfony</strong> qui envoie les mails.
+          Pour un projet <strong>Directus/Svelte</strong>, c'est <strong>Directus</strong> qui envoie les mails, voir la
+          marche à suivre ici : <a href="https://learndirectus.com/how-to-send-an-email"
+            target="_blank">https://learndirectus.com/how-to-send-an-email</a>
+        </p>
+        <p>
+          Par exemple, si un utilisateur soumet un formulaire d'inscription côté React, l'application React enverra un
+          appel API en POST au backend Symfony. Symfony fera l'ajout de l'utilisateur en BDD puis enverra un email de
+          confirmation.
+        </p>
+        <p class="warning">
+          Pour Symfony pensez à commenter la ligne :
+          <code>Symfony\Component\Mailer\Messenger\SendEmailMessage: async</code> dans
+          <code>config/packages/messenger.yaml</code>, sinon Symfony enverra tous tes mails en BDD sans les envoyer à
+          l'utilisateur.
+        </p>
+        <h3 class="tertiary-title">Ok mais je veux envoyer un vrai email moi !</h3>
+        <p>
+          Alors, tu peux par exemple utiliser ton compte gmail comme serveur SMTP, pour ça il faudra que tu définisses
+          <a href="https://support.google.com/mail/answer/185833?hl=fr" target="_blank">un mot de passe d'application
+            pour
+            ton compte</a>. On te conseille tout de même de créer un nouveau compte gmail, spécifique à ton projet, pour
+          éviter tout risque de sécurité avec ton compte perso. Ensuite, rends toi sur la documentation qui concerne ta
+          techno pour l'utiliser.
+        </p>
+        <p>
+          Par exemple <a href="https://symfony.com/doc/7.1/mailer.html" target="_blank">Symfony avec cette méthode</a>,
+          les emails seront vraiment envoyés sur les boites mails des destinataires.
+        </p>
+        <p class="warning">
+          Puis si tu galères, contact ton helper d'apothéose préféré ;)
+        </p>
+      </div>
+
+      <h2 class="secondary-title" id="upload-image">
+        <a href="#upload-image"># Upload d'images</a>
+      </h2>
+      <div class="content">
+        <h3 class="tertiary-title">Symfony/React</h3>
+        <p>Si les images doivent être envoyées par le front React, il y a plusieurs possibilités mais on va ici en
+          décrire
+          une seule, la plus "simple" à mettre en place. Si c'est juste des uploads côté back-office, donc côté Symfony,
+          voir la section "Symfony" plus bas.</p>
+        <p>
+          Pour envoyer une image en même temps que d'autres données en JSON, on n'a pas d'autres choix que transformer
+          notre
+          image en texte. Pour ça on utilise le format <a href="https://fr.wikipedia.org/wiki/Base64"
+            target="_blank">Base64</a>.<br />
+        </p>
+        <p>
+          Côté Symfony, il faut donc développer un endpoint classique qui est capable de récupèrer des données en POST.
+          Mais vu
+          que l'image qu'il va récupérer n'est qu'une chaîne de caractère, il va falloir être capable de recréer une
+          image
+          avec.
+          Soit directement dans le controller, soit dans un service. Si vous voulez des pistes sur comment faire ça,
+          cette
+          issue sur StackOverflow aide beaucoup : <a
+            href="https://stackoverflow.com/questions/55124010/base64-image-to-image-file-with-symfony-and-vichuploader"
+            target="_blank">https://stackoverflow.com/questions/55124010/base64-image-to-image-file-with-symfony-and-vichuploader</a>.
+          Ici VichUploader ne nous intéresse pas, ce sont seulement les deux services et comment ils sont utilisés qui
+          nous intéresse. On vous laisse essayer d'adapter ça de votre côté ;)
+        </p>
+        <p class="warning">
+          Attention, vu qu'on recrée une image à partir du base64, on ne stocke pas le base64 en bdd, mais le chemin
+          vers
+          l'image qu'on a créée.
+        </p>
+        <p>
+          Pour tester avec Insomnia, Postman ou autre, utilisez <a href="https://www.base64-image.de/"
+            target="_blank">https://www.base64-image.de/</a> pour convertir une image en base64 et
+          copier/coller le résultat dans le body de votre requête.
+        </p>
+        <p>Maintenant que c'est fait côté Symfony. Il ne reste plus qu'à gérer côté React. Vous avez plusieurs pistes
+          ici
+          :
+          <a href="https://stackoverflow.com/questions/47176280/how-to-convert-files-to-base64-in-react"
+            target="_blank">https://stackoverflow.com/questions/47176280/how-to-convert-files-to-base64-in-react</a>
+          soit en codant la fonctionnalité vous même soit en utilisant des librairies toutes faites. On vous laisse
+          tenter
+          ! <br />
+          Envoyez donc votre image en base64 dans le body de votre requête POST et ça devrait marcher comme sur des
+          roulettes.
+        </p>
+        <h3 class="tertiary-title">Directus/Svelte</h3>
+        <p>
+          Vous pouvez regarder la doc ici <a href="https://docs.directus.io/reference/files.html"
+            target="_blank">https://docs.directus.io/reference/files.html</a> qui indique comment upload des fichiers
+          via
+          l'API. Pas de base64 ici, mais du <code>multipart/form-data</code>. Pour envoyer vos données de formulaire
+          pour
+          l'ajout d'un article de blog, il faudra le faire en deux fois donc. Une première requête qui envoie les
+          données
+          textuelles (titre, contenu, catégories), et une autre qui envoie seulement l'image en la liant à l'article de
+          blog. L'id de l'article ayant été récupéré à la fin de la requête précédente.
+        </p>
+
+        <h3 class="tertiary-title">Symfony</h3>
+        <p>
+          Pour tout upload d'image directement depuis Symfony, vous avez des indications ici : <a
+            href="https://symfony.com/doc/current/controller/upload_file.html"
+            target="_blank">https://symfony.com/doc/current/controller/upload_file.html</a>.
+          Ça propose dès le début de plutôt utiliser <a href="https://github.com/dustin10/VichUploaderBundle"
+            target="_blank">https://github.com/dustin10/VichUploaderBundle</a>
+          plutôt que d'essayer de tout faire à la main. Tout étant précisément indiqué dans la doc, on ne détaillera pas
+          plus la manip ici.
+      </div>
+
+      <h2 class="secondary-title" id="temps-reel">
+        <a href="#temps-reel"># Temps réel</a>
+      </h2>
+      <div class="content">
+        <h3 class="tertiary-title">
+          Je veux des fonctionnalités en temps réel !
+        </h3>
+        <p>
+          Par exemple, je voudrais un système de chat ou de notifications.
+          <br />
+          Pour ça le plus simple, c'est d'utiliser <a href="https://socket.io/" target="blank">Socket.io</a>. C'est une
+          librairie qui permet de faire du temps réel. C'est du NodeJS, mais la prise en main n'est pas trop complexe et
+          la création d'un chat (sans stockage des messages) se fait rapidement.
+        </p>
+        <p>
+          Socket.io doit donc être installé sur un serveur Node. Un serveur Node c'est juste un fichier index.js
+          qu'on va lancer avec la commande `node index.js`. Dans ce fichier on va utiliser la librairie express pour
+          créer
+          un serveur HTTP. Et on va utiliser Socket.io pour créer un serveur de websocket. C'est ce serveur de websocket
+          qui va permettre de faire du temps réel.
+        </p>
+        <p class="warning">
+          Exemple: <br />
+          - Mon utilisateur soumet un form pour envoyer un message dans un chat <br />
+          - Le front émet un évènement avec un label (`newMessage` par exemple) avec le contenu du message vers le
+          serveur
+          de websocket <br />
+          - Le serveur de websocket reçoit l'évènement `newMessage` et l'envoie à tous les utilisateurs concernés <br />
+          - (optionnel) Le serveur de websocket envoie une requête API au back pour enregistrer le message en BDD
+          - Le front reçoit l'évènement `newMessage` et l'affiche dans le chat<br />
+          - (optionnel) Quand l'utilisateur recharge la page, le front va faire une requête API pour récupérer tous les
+          messages en BDD et les afficher <br />
+        </p>
+      </div>
+      <h2 class="secondary-title" id="end">
+        <a href="#end"># The End!</a>
+      </h2>
+      <div class="content">
+        <p>Et voilà, on a fait un bon tour de ce qui peut te poser problème. Pour le reste, à toi de te creuser les
+          méninges pour trouver des solutions à tes problèmes. Bien sûr tu peux demander de l'aide et ouvrir une issue
+          sur
+          le repo Projects de ton GitHug ;).Courage !</p>
+      </div>
+  </div>
+  </main>
+
+
+</body>
+
+</html>
